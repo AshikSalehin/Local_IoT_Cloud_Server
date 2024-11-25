@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BDU IoT Cloud Server</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    
+    <div style="background-color:lavender; height: 300px; display: grid; place-items: center; align-items: center;">
+        <div style="background-color: rgb(199, 217, 199); width: 70%; height: 600px;">
+         <h1>BDU IoT Cloud Server</h1>
+         <h2>User Login</h2>
+    <form id="login_form" method="POST" action="/login" style="align-items: center;">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <input type="submit" value="LOGIN">
+    </form>
+    <br>
+    <form action="/register" method="GET" style="align-items: center;">
+        <input type="submit" value="REGISTER">
+    </form>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Cloud Server</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            padding: 10px;
+        }
+        h3 {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px;
+            padding: 10px;
+            border: 2px solid grey;
+        }
+
+        p {
+            width: 60%;
+            border-collapse: collapse;
+            margin: 20px;
+            padding: 50px;
+            border: 1px solid cornflowerblue;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin-top: 20px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <h1>BDU IoT Cloud Server</h1>
+</head>
+<body>
+
+    <h3>Your Write API KEY: "http://<b id="wAPI">192.168.0.100</b>:5000/push_data/<b id="wUN">'username'</b>?S1=9&S2=8&S3=7"</H3>
+    <h3>Your Read API KEY: "http://<b id="rAPI">192.168.0.100</b>:5000/datas/<b id="rUN">'username'</b>?n=5"</H3>
+    <p>
+        <b>JavaScript Code For Formatting Read API Data:</b><br><br>
+                // Assume 'data' is the response from your GET request <br>
+        fetch('http://your-server-address/api-endpoint')<br>
+            .then(response => response.json())  // Convert the response to a JavaScript object<br>
+            .then(data => {<br>
+                console.log(data); // The data in the format [["timestamp","s1","s2","s3"], ...]<br>
+                <br>
+                // Iterate through the rows<br>
+                data.forEach(row => {<br>
+                    const timestamp = row[0]; // The first element is the timestamp<br>
+                    const sensor1 = row[1];   // The second element is sensor1 data<br>
+                    const sensor2 = row[2];   // The third element is sensor2 data<br>
+                    const sensor3 = row[3];   // The fourth element is sensor3 data<br>
+                    <br>
+                    console.log(`Timestamp: ${timestamp}, S1: ${sensor1}, S2: ${sensor2}, S3: ${sensor3}`);<br>
+                    <br>
+                    // You can further process the data, e.g., append it to a table, display in the UI, etc.<br>
+                });<br>
+            })<br>
+            .catch(error => {<br>
+                console.error('Error fetching data:', error);<br>
+            });<br>
+            <br>
+    </p>
+
+    <h1>Recent Sensor Readings</h1>
+
+    <table id="sensorTable" border="1">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Sensor 1</th>
+                <th>Sensor 2</th>
+                <th>Sensor 3</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data rows will be inserted here -->
+        </tbody>
+    </table>
+
+    <div class="chart-container">
+        <canvas id="sensor1Chart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="sensor2Chart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="sensor3Chart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="sensor4Chart"></canvas>
+    </div>
+
+    <script>
+        const refreshInterval = 15000; // 15 seconds
+        var sIP;
+
+        const sensor1Chart = new Chart(document.getElementById('sensor1Chart'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Sensor 1',
+                    data: [],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            }
+        });
+
+        const sensor2Chart = new Chart(document.getElementById('sensor2Chart'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Sensor 2',
+                    data: [],
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            }
+        });
+
+        const sensor3Chart = new Chart(document.getElementById('sensor3Chart'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Sensor 3',
+                    data: [],
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            }
+        });
+
+        function fetchData() {
+            var username = "{{ username }}";
+            var n = 10;
+
+
+
+
+            fetch('/get_ip')
+                .then(response => response.json())
+                .then(data => {
+                    const serverIP = data.ip;
+                    sIP = serverIP;
+                    const wAPI = document.getElementById("wAPI");
+                    const rAPI = document.getElementById("rAPI");
+                    const wUN = document.getElementById("wUN");
+                    const rUN = document.getElementById("rUN");
+                    wAPI.innerText = ''+sIP;
+                    rAPI.innerText = ''+sIP;
+                    wUN.innerText = ''+username;
+                    rUN.innerText = ''+username;
+
+                    const url = 'http://'+sIP+':5000/datas/'+username+'?n='+n;
+                    var i = 0;
+
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(data => {
+                        
+                            const tableBody = document.querySelector('#sensorTable tbody');
+
+                            // Clear the table body to remove old data
+                            tableBody.innerHTML = '';
+
+                            // Prepare arrays for chart data
+                            const labels = [];
+                            const sensor1Data = [];
+                            const sensor2Data = [];
+                            const sensor3Data = [];
+
+                            data.forEach(row => {
+                                // Add data to the table
+                                const tableRow = document.createElement('tr');
+
+
+                                // Prepare data for charts
+                                i++;
+                                labels.push(i);
+                                sensor1Data.push(row[1]);
+                                sensor2Data.push(row[2]);
+                                sensor3Data.push(row[3]);
+
+                                row.forEach(cellData => {
+                                const cell = document.createElement('td');
+                                cell.textContent = cellData;
+                                tableRow.appendChild(cell);
+                            });
+                            
+                            tableBody.appendChild(tableRow);
+                            });
+
+                            // Update charts with new data
+                            updateChart(sensor1Chart, labels, sensor1Data);
+                            updateChart(sensor2Chart, labels, sensor2Data);
+                            updateChart(sensor3Chart, labels, sensor3Data);
+                        })
+                        .catch(error => console.error('Error fetching data:', error));
+
+
+                    // You can now use the serverIP variable in your function
+                })
+                .catch(error => console.error('Error fetching server IP:', error));
+            
+        }
+
+        function fetchServerIP() {
+            
+        }
+
+        function updateChart(chart, labels, data) {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.update();
+        }
+
+        // Fetch data immediately when the page loads
+        fetchData();
+
+        // Set up interval to refresh data every 15 seconds
+        setInterval(fetchData, refreshInterval);
+    </script>
+
+</body>
+</html>
+

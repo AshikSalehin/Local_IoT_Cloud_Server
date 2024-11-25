@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BDU IoT Cloud Server</title>
+</head>
+<body>
+    <div style="background-color:lavender; height: 300px; display: grid; place-items: center; align-items: center;">
+        <div style="background-color: lightgreen; width: 70%; height: 600px;">
+         <h1>BDU IoT Cloud Server</h1>
+       
+    <h2>Register User</h2>
+    <form action="/register" method="POST" style="align-items: center;">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <label for="sensor_count">Number of Sensors:</label><br>
+        <input type="number" id="sensor_count" name="sensor_count" min="1" max="10" required><br><br>
+        <div id="sensor_names">
+            <!-- Sensor name fields will be added here -->
+        </div>
+        <input type="submit" value="REGISTER">
+    </form>
+    <br>
+    <form action="/login" method="GET" style="align-items: center;">
+        <input type="submit" value="LOGIN">
+    </form>
+</div>
+</div>
+    <script>
+        document.getElementById('sensor_count').addEventListener('input', function() {
+            var sensorCount = this.value;
+            var sensorNamesDiv = document.getElementById('sensor_names');
+            sensorNamesDiv.innerHTML = '';
+            for (var i = 0; i < sensorCount; i++) {
+                var label = document.createElement('label');
+                label.textContent = 'Sensor ' + (i+1) + ' Name:';
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.name = 'sensor_' + i;
+                input.required = true;
+                sensorNamesDiv.appendChild(label);
+                sensorNamesDiv.appendChild(input);
+                sensorNamesDiv.appendChild(document.createElement('br'));
+                sensorNamesDiv.appendChild(document.createElement('br'));
+            }
+        });
+    </script>
+</body>
+</html>
